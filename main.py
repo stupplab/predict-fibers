@@ -71,7 +71,7 @@ def ml_predict(seqs):
 
     f = featurization(seqs)
     X, seqs = f[0], f[1]
-    checkpoint = torch.load('../models/lstm3/model.tar')
+    checkpoint = torch.load('model.tar')
     model = Model().to(device)
     model.load_state_dict(checkpoint['best_model_state_dict'])
     model.eval()
