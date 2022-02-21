@@ -1,20 +1,10 @@
 """ Generate fiber forming sequences using the ML model """
 
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib.colors import to_rgba, to_rgb
-import os, time
-import itertools
-import tqdm
-
-
-
+import torch
 
 ############################## ML predict fiber ##############################
 
-# predict using ML model
-import torch
 
 OUTPUT_SEQ_LEN       = 1
 INPUT_DIM            = 20
@@ -88,7 +78,7 @@ def ml_predict(seqs):
     x = torch.tensor(X).float()
     z = model(x).detach().numpy()
     
-    return seqs, z
+    return seqs, z.reshape(-1)
 
 
 
@@ -103,7 +93,7 @@ def main():
     'VSVMDD', 'HIVRR', 'EVEAEE', 'EVEEVE', 'LSLDDD', 'DVLDD', 'VILLRK']
     _, z = ml_predict(seqs)
     
-    print(z)
+    print(np.array(list(zip(seqs,z))))
 
 
 
