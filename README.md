@@ -1,5 +1,5 @@
 
-## Deep Learning model for differentiating fibers from nonfibers for Peptide Amphiphiles
+## Deep Learning model to classify a Peptide Amphiphile assembly into Fiber and Nonfiber given its peptide sequence
 
 Launch the fiber predicting Jupyter notebook-main.ipynb-by 
 - click -> 
