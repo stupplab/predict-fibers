@@ -324,9 +324,10 @@ def ml_predict(seqs):
     for i,seq in enumerate(seqs):
         for j,res in enumerate(seq[:max_peplen]):
             X[i,j,res_dict[res]] = 1
-    z = np.round(model.predict(X)).astype(int)
+    z = list(np.round(model.predict(X),1).reshape(-1))
+    prediction = list(np.array(['nonfiber','fiber'])[np.round(z).astype(int)].reshape(-1))
     del model
-    return np.array(list(zip(seqs,list(np.array(['nonfiber', 'fiber'])[z].reshape(-1)))))
+    return np.array(list(zip(seqs,prediction,z)))
 
 ###################################################################################
 
