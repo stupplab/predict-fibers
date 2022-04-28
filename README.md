@@ -1,4 +1,6 @@
 
+## Deep Learning model for differentiating fibers from nonfibers for Peptide Amphiphiles
+
 Launch the fiber predicting Jupyter notebook-main.ipynb-by 
 - click -> 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/stupplab/predict-fibers/HEAD) 
