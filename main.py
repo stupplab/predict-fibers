@@ -349,62 +349,61 @@ def ml_predict(seqs, model_path):
 if type(args.predict) != type(None):
     datafile_ = args.predict
     data = pd.read_csv(datafile_, sep=',', header=None).values
-        
-    _,args = np.unique(data[:,0], return_index=True)
-    data = data[args]
+    
 
     seqs = data[:,0]
-    fiber_or_not = data[:,1]
-
     _,z1,p1,model_high = ml_predict(seqs, 'model_high.tar')
     _,z2,p2,model_low = ml_predict(seqs, 'model_low.tar')
 
-    
-    f = model_high.one_hot_encode(datafile_)
-    X, y = f[0], f[1]        
-    P, N, TP, FP, TN, FN = model_high.confusion(X, y)
-    precision = 100 * TP[0] / ( TP[0] + FP[0] )
-    accuracy = 100 * (TP[0]+TN[0]) / (P[0]+N[0])
-    print('--------------- model_high ---------------')
-    print(f'Confusion Table: P - {P} | N - {N}')
-    print(f'|   TP {TP}   |   FN {FN}   |')
-    print(f'|   FP {FP}   |   TN {TN}   |')
-    print(f'Precision {precision} Accuracy {accuracy}')
-    print('------------------------------------------')
-
-    f = model_low.one_hot_encode(datafile_)
-    X, y = f[0], f[1]        
-    P, N, TP, FP, TN, FN = model_low.confusion(X, y)
-    precision = 100 * TP[0] / ( TP[0] + FP[0] )
-    accuracy = 100 * (TP[0]+TN[0]) / (P[0]+N[0])
-    print('--------------- model_low ---------------')
-    print(f'Confusion Table: P - {P} | N - {N}')
-    print(f'|   TP {TP}   |   FN {FN}   |')
-    print(f'|   FP {FP}   |   TN {TN}   |')
-    print(f'Precision {precision} Accuracy {accuracy}')
-    print('------------------------------------------')
-
-    y = np.copy(fiber_or_not)
-    z = ((np.round(z1)>0.5) | (np.round(z2)>0.5))
-    P = sum(y)
-    N = len(y) - P
-    TP = sum(y*z)
-    FP = sum((1-y)*z)
-    TN = sum((1-y)*(1-z))
-    FN = sum(y*(1-z))
-    precision = 100 * TP / ( TP + FP )
-    accuracy = 100 * (TP+TN) / (P+N)
-    print('--------------- combined -----------------')
-    print(f'Confusion Table: P - {P} | N - {N}')
-    print(f'|   TP {TP}   |   FN {FN}   |')
-    print(f'|   FP {FP}   |   TN {TN}   |')
-    print(f'Precision {precision} Accuracy {accuracy}')
-    print('------------------------------------------')
-    
-
     file_predict = datafile_.replace('.csv','')+'_predict.csv'
-    data = np.array([seqs, z1, p1, z2, p2]).T
-    pd.DataFrame(data).to_csv(file_predict, sep=',', header=['seqs','model_high z','model_high prediction','model_low z','model_low prediction'], index=False)
+    data_ = np.array([seqs, z1, p1, z2, p2]).T
+    pd.DataFrame(data_).to_csv(file_predict, sep=',', header=['seqs','model_high z','model_high prediction','model_low z','model_low prediction'], index=False)
+
+    
+    if data.shape[1]>1:
+        fiber_or_not = data[:,1]
+                
+        f = model_high.one_hot_encode(datafile_)
+        X, y = f[0], f[1]        
+        P, N, TP, FP, TN, FN = model_high.confusion(X, y)
+        precision = 100 * TP[0] / ( TP[0] + FP[0] )
+        accuracy = 100 * (TP[0]+TN[0]) / (P[0]+N[0])
+        print('--------------- model_high ---------------')
+        print(f'Confusion Table: P - {P} | N - {N}')
+        print(f'|   TP {TP}   |   FN {FN}   |')
+        print(f'|   FP {FP}   |   TN {TN}   |')
+        print(f'Precision {precision} Accuracy {accuracy}')
+        print('------------------------------------------')
+
+        f = model_low.one_hot_encode(datafile_)
+        X, y = f[0], f[1]        
+        P, N, TP, FP, TN, FN = model_low.confusion(X, y)
+        precision = 100 * TP[0] / ( TP[0] + FP[0] )
+        accuracy = 100 * (TP[0]+TN[0]) / (P[0]+N[0])
+        print('--------------- model_low ---------------')
+        print(f'Confusion Table: P - {P} | N - {N}')
+        print(f'|   TP {TP}   |   FN {FN}   |')
+        print(f'|   FP {FP}   |   TN {TN}   |')
+        print(f'Precision {precision} Accuracy {accuracy}')
+        print('------------------------------------------')
+
+        y = np.copy(fiber_or_not)
+        z = ((np.round(z1)>0.5) | (np.round(z2)>0.5))
+        P = sum(y)
+        N = len(y) - P
+        TP = sum(y*z)
+        FP = sum((1-y)*z)
+        TN = sum((1-y)*(1-z))
+        FN = sum(y*(1-z))
+        precision = 100 * TP / ( TP + FP )
+        accuracy = 100 * (TP+TN) / (P+N)
+        print('--------------- combined -----------------')
+        print(f'Confusion Table: P - {P} | N - {N}')
+        print(f'|   TP {TP}   |   FN {FN}   |')
+        print(f'|   FP {FP}   |   TN {TN}   |')
+        print(f'Precision {precision} Accuracy {accuracy}')
+        print('------------------------------------------')
+
 
 
 else:
