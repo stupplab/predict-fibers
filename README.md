@@ -1,6 +1,8 @@
 
 ## Deep Learning model to classify a Peptide Amphiphile assembly into Fiber and Nonfiber given its peptide sequence
 
+
+## Run using browser
 Launch the fiber predicting Jupyter notebook-main.ipynb-by 
 - click -> 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/stupplab/predict-fibers/HEAD) 
@@ -21,3 +23,12 @@ Details are as below
     - False Negative   93
     - Precision       93%
     - Accuracy        92%
+
+
+## Run using command line on your computer
+```
+git clone https://github.com/stupplab/predict-fibers.git
+cd predict-fibers
+python main.py --predict seqs.csv
+```
+This will create the `seqs_predict.csv` in the same directory. Add your own sequences to `seqs.csv`
