@@ -1,6 +1,2 @@
 numpy
-pandas
-scipy
-tqdm
 torch
-scikit-learn

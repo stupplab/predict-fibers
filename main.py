@@ -4,10 +4,19 @@ import os, time
 import copy
 import numpy as np
 import torch
+import argparse
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler
 import tqdm
+
+
+
+################################### ARGPARSE #####################################
+msg = "Main script for ML."
+parser = argparse.ArgumentParser(description = msg)
+parser.add_argument("--predict", help = "Predict using the given data (in csv format).")
+args = parser.parse_args()
+###################################################################################
 
 
 ################################## ML ARCHITECTURE ################################
@@ -42,17 +51,17 @@ class LSTM(torch.nn.Module):
     """ ML model architecture
     """
 
-    def __init__(self, input_size, output_size):
+    def __init__(self, input_size, output_size, hidden_size=100, dropout_lstm=0.8, dropout_fc=0.8):
         super().__init__()
-        dropout = 0.4
-        self.hidden_size = 200
-        self.num_layers = 1
+        
+        self.hidden_size = hidden_size
+        self.num_layers = 2
 
-        self.lstm = torch.nn.LSTM(input_size, self.hidden_size, self.num_layers, dropout=0, batch_first=True)
+        self.lstm = torch.nn.LSTM(input_size, self.hidden_size, self.num_layers, dropout=dropout_lstm, batch_first=True)
         self.fc = torch.nn.Sequential(
             torch.nn.Linear(self.hidden_size, self.hidden_size),
             torch.nn.ReLU(),
-            torch.nn.Dropout(dropout),
+            torch.nn.Dropout(dropout_fc),
             torch.nn.Linear(self.hidden_size, output_size),
             torch.nn.Sigmoid()
             )
@@ -310,9 +319,13 @@ class Model():
         z = self.model( torch.tensor(X).float() ).detach().numpy()
         return z
 
+
+
+###################################################################################
+
 ##################################### LOAD MODEL ##################################
-def ml_predict(seqs):
-    model = Model(model_path='model.tar')
+def ml_predict(seqs, model_path):
+    model = Model(model_path=model_path)
     model.load_model()
     model.model.load_state_dict(model.checkpoint['best_model_state_dict'])
     residues = ['G', 'A', 'V', 'S', 'T', 'L', 'I', 'M', 'P', 'F', 'Y', 'W', 'N', 'Q', 'H', 'K', 'R', 'E', 'D', 'C']
@@ -326,21 +339,92 @@ def ml_predict(seqs):
             X[i,j,res_dict[res]] = 1
     z = list(np.round(model.predict(X),1).reshape(-1))
     prediction = list(np.array(['nonfiber','fiber'])[np.round(z).astype(int)].reshape(-1))
-    del model
-    return np.array(list(zip(seqs,prediction,z)))
+    
+    return seqs,z,prediction,model
 
 ###################################################################################
 
-################################## USER ADD SEQS HERE #############################
+######################################## USER #####################################
 
-seqs = [
-    'VVAAEE', 'VVVAAAEEE',
-    'VAEVAE', 'VVVVEE', 'AVVVEE', 'EVAAVE', 'WVKAK', 'AWKK', 'YLGSRK', 'IISGKK', 
-    'VSVMDD', 'HIVRR', 'EVEAEE', 'EVEEVE', 'LSLDDD', 'DVLDD', 'VILLRK'
-    ]
+if type(args.predict) != type(None):
+    datafile_ = args.predict
+    data = pd.read_csv(datafile_, sep=',', header=None).values
+        
+    _,args = np.unique(data[:,0], return_index=True)
+    data = data[args]
+
+    seqs = data[:,0]
+    fiber_or_not = data[:,1]
+
+    _,z1,p1,model_high = ml_predict(seqs, 'model_high.tar')
+    _,z2,p2,model_low = ml_predict(seqs, 'model_low.tar')
+
+    
+    f = model_high.one_hot_encode(datafile_)
+    X, y = f[0], f[1]        
+    P, N, TP, FP, TN, FN = model_high.confusion(X, y)
+    precision = 100 * TP[0] / ( TP[0] + FP[0] )
+    accuracy = 100 * (TP[0]+TN[0]) / (P[0]+N[0])
+    print('--------------- model_high ---------------')
+    print(f'Confusion Table: P - {P} | N - {N}')
+    print(f'|   TP {TP}   |   FN {FN}   |')
+    print(f'|   FP {FP}   |   TN {TN}   |')
+    print(f'Precision {precision} Accuracy {accuracy}')
+    print('------------------------------------------')
+
+    f = model_low.one_hot_encode(datafile_)
+    X, y = f[0], f[1]        
+    P, N, TP, FP, TN, FN = model_low.confusion(X, y)
+    precision = 100 * TP[0] / ( TP[0] + FP[0] )
+    accuracy = 100 * (TP[0]+TN[0]) / (P[0]+N[0])
+    print('--------------- model_low ---------------')
+    print(f'Confusion Table: P - {P} | N - {N}')
+    print(f'|   TP {TP}   |   FN {FN}   |')
+    print(f'|   FP {FP}   |   TN {TN}   |')
+    print(f'Precision {precision} Accuracy {accuracy}')
+    print('------------------------------------------')
+
+    y = np.copy(fiber_or_not)
+    z = ((np.round(z1)>0.5) | (np.round(z2)>0.5))
+    P = sum(y)
+    N = len(y) - P
+    TP = sum(y*z)
+    FP = sum((1-y)*z)
+    TN = sum((1-y)*(1-z))
+    FN = sum(y*(1-z))
+    precision = 100 * TP / ( TP + FP )
+    accuracy = 100 * (TP+TN) / (P+N)
+    print('--------------- combined -----------------')
+    print(f'Confusion Table: P - {P} | N - {N}')
+    print(f'|   TP {TP}   |   FN {FN}   |')
+    print(f'|   FP {FP}   |   TN {TN}   |')
+    print(f'Precision {precision} Accuracy {accuracy}')
+    print('------------------------------------------')
+    
+
+    file_predict = datafile_.replace('.csv','')+'_predict.csv'
+    data = np.array([seqs, z1, p1, z2, p2]).T
+    pd.DataFrame(data).to_csv(file_predict, sep=',', header=['seqs','model_high z','model_high prediction','model_low z','model_low prediction'], index=False)
 
 
-print(ml_predict(seqs))
+else:
+    # add your seqs here
+    seqs = [
+        'VVAAEE', 'VVVAAAEEE', 'AAGGEE',
+        'VAEVAE', 'VVVVEE', 'AVVVEE', 'EVAAVE', 'WVKAK', 'AWKK', 'YLGSRK', 'IISGKK', 
+        'VSVMDD', 'HIVRR', 'EVEAEE', 'EVEEVE', 'LSLDDD', 'DVLDD', 'VILLRK',
+        'DINGGKTTKS', 'NINGGKTTKS', 'NIDGGKTTKS',
+        'LLLGGKTTKS','IIIGGKTTKS','LIIGGKTTKS',
+        ]
+
+    _,z1,p1,_ = ml_predict(seqs, 'model_high.tar')
+    _,z2,p2,_ = ml_predict(seqs, 'model_low.tar')
+
+
+    data = np.array([seqs, z1, p1, z2, p2]).T
+    df = pd.DataFrame(data, columns=['seqs','model_high z','model_high prediction','model_low z','model_low prediction'])
+    print(df)
+
 
 ###################################################################################
 
