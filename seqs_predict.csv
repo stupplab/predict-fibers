@@ -1,0 +1,19 @@
+seqs,model_high z,model_high prediction,model_low z,model_low prediction
+VVAAEE,1.0,fiber,1.0,fiber
+VVVAAAEE,1.0,fiber,1.0,fiber
+AAGGEE,0.0,nonfiber,0.4,nonfiber
+VAEVAE,1.0,fiber,1.0,fiber
+VVVVEE,1.0,fiber,1.0,fiber
+AVVVEE,1.0,fiber,0.1,nonfiber
+EVAAVE,0.9,fiber,0.6,fiber
+WVKAK,1.0,fiber,1.0,fiber
+AWKK,1.0,fiber,0.7,fiber
+YLGSRK,1.0,fiber,1.0,fiber
+IISGKK,1.0,fiber,1.0,fiber
+VSVMDD,1.0,fiber,1.0,fiber
+HIVRR,1.0,fiber,0.5,nonfiber
+EVEAEE,1.0,fiber,0.6,fiber
+EVEEVE,0.0,nonfiber,0.3,nonfiber
+LSLDDD,1.0,fiber,1.0,fiber
+DVLDD,1.0,fiber,0.5,nonfiber
+VILLRK,1.0,fiber,1.0,fiber

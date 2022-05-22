@@ -27,8 +27,11 @@ Details are as below
 
 ## Run using command line on your computer
 ```
-git clone https://github.com/stupplab/predict-fibers.git
-cd predict-fibers
-python main.py --predict seqs.csv
+git clone https://github.com/stupplab/predict-fibers.git  # download the repository
+cd predict-fibers                  # go inside the downloded directory
+python -m venv env                 # create virtual envrironment env
+source env/bin/activate            # activate the env
+pip install -r requirements.txt    # install required libraries in the env
+python main.py --predict seqs.csv  # use the model
 ```
 This will create the `seqs_predict.csv` in the same directory. Add your own sequences to `seqs.csv`
