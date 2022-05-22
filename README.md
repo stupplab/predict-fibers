@@ -14,7 +14,7 @@ To predict, simply add the peptide sequences in `seqs` variable at the bottom of
 
 
 
-## Run on `bash` command line on your computer
+## Run on `bash` command line terminal on your computer
 ```bash
 git clone https://github.com/stupplab/predict-fibers.git  # download the repository
 cd predict-fibers                                         # go inside the downloded directory
